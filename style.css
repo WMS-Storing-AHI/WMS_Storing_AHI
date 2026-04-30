@@ -79,3 +79,37 @@ body {
   display: inline-block;
   text-align: center;
 }
+
+/* Sidebar Group Styles */
+.menu-group-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  border-left: 1px solid #3f3f46; /* Garis vertikal pandu (Zinc-700) */
+  margin-left: 1.75rem; /* Menjorokkan submenu */
+}
+
+.menu-group-content.open {
+  max-height: 1000px; /* Nilai besar agar bisa menampung banyak menu */
+  transition: max-height 0.5s ease-in;
+}
+
+/* Animasi Chevron (Panah) */
+.chevron-icon {
+  transition: transform 0.3s ease;
+}
+
+.chevron-rotate {
+  transform: rotate(180deg);
+}
+
+/* Indentasi Submenu */
+.submenu-item {
+  padding-left: 1.5rem !important;
+  font-size: 0.75rem !important;
+  color: #a1a1aa !important; /* Zinc-400 */
+}
+
+.submenu-item:hover {
+  color: white !important;
+}
