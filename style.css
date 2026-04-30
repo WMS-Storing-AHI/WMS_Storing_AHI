@@ -1,35 +1,62 @@
-/* GLOBAL CSS REFINED */
+/* THE INDUSTRIALIST DESIGN SYSTEM */
+:root {
+  --primary: #d97706; /* Amber-600 */
+  --primary-hover: #b45309;
+  --bg-app: #f4f4f5; /* Zinc-100 */
+  --bg-card: #ffffff;
+  --text-main: #18181b; /* Zinc-900 */
+  --text-muted: #71717a; /* Zinc-500 */
+  --border: #e4e4e7; /* Zinc-200 */
+  --font-ui: 'Inter', sans-serif;
+  --font-data: 'JetBrains Mono', monospace;
+}
+
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #f8fafc;
-  color: #334155;
-  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-ui);
+  background-color: var(--bg-app);
+  color: var(--text-main);
   letter-spacing: -0.01em;
 }
 
-/* KHUSUS UNTUK DATA ANGKA / SKU / NIK */
+/* Typography for Data Numbers */
 .font-data {
-  font-family: 'JetBrains Mono', monospace !important;
-  letter-spacing: -0.02em;
+  font-family: var(--font-data) !important;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Rampingkan UI */
-input, select, button {
-  font-family: inherit;
-  outline: none !important;
+/* Industrial Components */
+.btn-industrial {
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 4px; /* Sudut lebih tegas */
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  font-size: 0.875rem;
 }
 
-/* Minimalist Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-
-/* Smooth Fade */
-.fade-in { animation: fadeIn 0.3s ease-out forwards; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-/* SweetAlert Custom UI */
-.swal2-popup {
-  border-radius: 12px !important;
-  font-family: 'Inter', sans-serif !important;
+.btn-industrial:hover {
+  background-color: var(--primary-hover);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
 }
+
+.input-industrial {
+  border: 1px solid var(--border);
+  background-color: #fafafa;
+  border-radius: 4px;
+  padding: 0.6rem 0.8rem;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.input-industrial:focus {
+  border-color: var(--primary);
+  ring: 2px rgba(217, 119, 6, 0.1);
+  background-color: white;
+}
+
+/* Compact Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 10px; }
