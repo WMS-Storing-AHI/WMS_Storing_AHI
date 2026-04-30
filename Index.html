@@ -1,27 +1,53 @@
 <!DOCTYPE html>
 <html lang="id">
   <head>
-    <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- GANTI Header.html DENGAN INI -->
-    <link rel="stylesheet" href="style.css">
-    <!-- Jika di Header.html Anda pakai CDN Tailwind, pasang juga di sini -->
-    <script src="https://cdn.tailwindcss.com"></script> 
-    
     <title>WMS Productivity System</title>
+
+    <!-- 1. GOOGLE FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- 2. LIBRARY EXTERNAL (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- 3. PANGGIL CSS CUSTOM -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- 4. TAILWIND CONFIG -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#3182ce',
+              darkBlue: '#1e3a8a'
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
   </head>
-  <body class="antialiased overflow-x-hidden">
+  <body class="antialiased overflow-x-hidden bg-slate-50">
     
+    <!-- Wadah Utama Aplikasi -->
     <div id="app-container" class="min-h-screen relative">
+      <!-- Loading State Awal -->
       <div id="initial-loader" class="flex flex-col items-center justify-center h-screen space-y-4">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary"></div>
         <p class="text-slate-500 font-medium animate-pulse text-sm">Menyiapkan Ruang Kerja...</p>
       </div>
     </div>
 
-    <!-- GANTI App_JS DENGAN INI -->
+    <!-- PANGGIL LOGIKA JAVASCRIPT -->
     <script src="script.js"></script>
   </body>
 </html>
