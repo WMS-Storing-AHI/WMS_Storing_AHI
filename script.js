@@ -37,87 +37,81 @@ function initializeDashboard() {
   const user = window.userData;
   if (!user || !user.menus) return;
 
+  // 1. Update Info Header
+  if(document.getElementById('user-display-name')) document.getElementById('user-display-name').innerText = user.nama;
+  if(document.getElementById('user-role')) document.getElementById('user-role').innerText = user.role;
+
   const menuContainer = document.getElementById('sidebar-menu');
   if (!menuContainer) return;
   menuContainer.innerHTML = '';
 
+  // 2. Kelompokkan Menu
   const menus = user.menus;
-
-  // 1. Identifikasi Root Items (Items yang Parent-nya kosong "")
-  const rootItems = menus.filter(m => m.parent === "");
+  
+  // Ambil Item Utama (Parentnya kosong)
+  const rootItems = menus.filter(m => m.parent === "" || !m.parent);
 
   rootItems.forEach(item => {
-    // Cek apakah item ini punya anak?
+    // Cari apakah ada menu lain yang menganggap item ini sebagai Parent-nya
     const children = menus.filter(m => m.parent === item.name);
 
     if (children.length > 0) {
-      // JIKA PUNYA ANAK: Render sebagai Accordion (Collapse/Expand)
+      // Jika punya anak -> Buat Menu Accordion (Bisa Buka Tutup)
       menuContainer.appendChild(createCollapsibleMenu(item, children));
     } else {
-      // JIKA TIDAK PUNYA ANAK: Render sebagai Tombol Biasa
+      // Jika tidak punya anak -> Buat Menu Tunggal
       menuContainer.appendChild(createSimpleMenu(item));
     }
   });
 }
 
-// Tombol Menu Biasa (Tanpa Submenu)
 function createSimpleMenu(item) {
   const btn = document.createElement('button');
-  btn.className = "w-full flex items-center justify-between px-4 py-3 text-[11px] font-black text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-all group uppercase tracking-widest";
-  
+  btn.className = "w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-all uppercase tracking-widest group";
   btn.innerHTML = `
-    <div class="flex items-center gap-3">
-      <span class="text-base">${item.icon || '•'}</span>
-      <span>${item.name}</span>
-    </div>
+    <span class="text-base group-hover:scale-110 transition-transform">${item.icon || '•'}</span>
+    <span>${item.name}</span>
   `;
-  
   btn.onclick = () => {
-    setActiveMenu(btn);
+    document.querySelectorAll('#sidebar-menu button').forEach(b => b.classList.remove('menu-active'));
+    btn.classList.add('menu-active');
     navigateTo(item.pageId);
   };
   return btn;
 }
 
-// Tombol Menu Accordion (Dengan Submenu)
 function createCollapsibleMenu(parentItem, children) {
   const container = document.createElement('div');
-  container.className = "w-full mb-1";
+  container.className = "mb-1";
 
-  // Header Parent
   const header = document.createElement('button');
-  header.className = "w-full flex items-center justify-between px-4 py-3 text-[11px] font-black text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-all group uppercase tracking-widest";
-  
+  header.className = "w-full flex items-center justify-between px-4 py-3 text-[11px] font-black text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-all uppercase tracking-widest group";
   header.innerHTML = `
     <div class="flex items-center gap-3">
-      <span class="text-base">${parentItem.icon || '📁'}</span>
+      <span class="text-base group-hover:scale-110 transition-transform">${parentItem.icon || '📁'}</span>
       <span>${parentItem.name}</span>
     </div>
-    <svg class="chevron-icon w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-    </svg>
+    <svg class="chevron-icon w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
   `;
 
-  // Container Submenu
   const subContainer = document.createElement('div');
   subContainer.className = "menu-group-content";
 
   children.forEach(child => {
     const subBtn = document.createElement('button');
-    subBtn.className = "w-full text-left px-4 py-2.5 text-[10px] font-bold text-zinc-500 hover:text-white hover:bg-zinc-800/50 transition-all uppercase tracking-widest submenu-item";
+    subBtn.className = "w-full text-left px-5 py-2.5 text-[10px] font-bold text-zinc-500 hover:text-white hover:bg-zinc-800/50 transition-all uppercase tracking-widest";
     subBtn.innerText = child.name;
     subBtn.onclick = () => {
-      setActiveMenu(subBtn);
+      document.querySelectorAll('#sidebar-menu button').forEach(b => b.classList.remove('menu-active'));
+      subBtn.classList.add('menu-active');
       navigateTo(child.pageId);
     };
     subContainer.appendChild(subBtn);
   });
 
-  // Logika Klik untuk Expand/Collapse
   header.onclick = () => {
     const isOpen = subContainer.classList.contains('open');
-    
-    // Tutup semua menu lain yang sedang terbuka (Optional: Accordion Mode)
+    // Tutup accordion lain (opsional)
     document.querySelectorAll('.menu-group-content').forEach(el => el.classList.remove('open'));
     document.querySelectorAll('.chevron-icon').forEach(el => el.classList.remove('chevron-rotate'));
 
@@ -130,42 +124,6 @@ function createCollapsibleMenu(parentItem, children) {
   container.appendChild(header);
   container.appendChild(subContainer);
   return container;
-}
-
-// Helper untuk menandai menu yang sedang aktif
-function setActiveMenu(element) {
-  document.querySelectorAll('#sidebar-menu button').forEach(b => {
-    b.classList.remove('text-amber-500', 'bg-zinc-800', 'border-l-4', 'border-amber-600');
-  });
-  element.classList.add('text-amber-500', 'bg-zinc-800');
-}
-
-// Fungsi Helper untuk Membuat Tombol Menu
-function createMenuButton(m, isSubmenu) {
-  const btn = document.createElement('button');
-  // Styling: Jika submenu, beri margin kiri agar menjorok
-  const paddingClass = isSubmenu ? "pl-8 pr-4" : "px-4";
-  
-  btn.className = `w-full flex items-center gap-3 ${paddingClass} py-3 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-all group`;
-  
-  // Gunakan Icon dari Sheet (Emoji) atau dot jika kosong
-  const icon = m.icon ? m.icon : "•";
-  
-  btn.innerHTML = `
-    <span class="text-lg group-hover:scale-110 transition-transform">${icon}</span>
-    <span class="truncate">${m.name}</span>
-  `;
-  
-  btn.onclick = () => {
-    // Hapus status aktif dari tombol lain
-    document.querySelectorAll('#sidebar-menu button').forEach(b => b.classList.remove('bg-zinc-800', 'text-white', 'border-r-2', 'border-amber-600'));
-    // Tambah status aktif ke tombol ini
-    btn.classList.add('bg-zinc-800', 'text-white', 'border-r-2', 'border-amber-600');
-    
-    navigateTo(m.pageId);
-  };
-  
-  return btn;
 }
 
 // FUNGSI MOBILE MENU
