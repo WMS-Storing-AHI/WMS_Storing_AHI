@@ -184,6 +184,9 @@ function executeScripts(container) {
   }
 }
 
+/**
+ * 3. UPDATE HANDLE LOGIN (Cek Status Blocked)
+ */
 function handleLogin(username, password) {
   const btn = document.getElementById('login-btn');
   btn.disabled = true; btn.innerText = "VERIFYING...";
@@ -193,8 +196,16 @@ function handleLogin(username, password) {
     .then(res => {
       if (res.status === "success") {
         localStorage.setItem("activeUser", res.username);
-        window.userData = res; // Simpan ke memori
+        window.userData = res;
+        
+        // Mulai Monitoring setelah login sukses
+        startIdleMonitoring();
+        startHeartbeat();
+        
         navigateTo('Dashboard_Layout');
+      } else if (res.status === "blocked") {
+        btn.disabled = false; btn.innerText = "OTORISASI MASUK →";
+        Swal.fire('Akses Ditolak', res.message, 'warning');
       } else {
         btn.disabled = false; btn.innerText = "OTORISASI MASUK →";
         Swal.fire('Gagal!', res.message, 'error');
@@ -203,8 +214,55 @@ function handleLogin(username, password) {
 }
 
 function handleLogout() {
-  localStorage.clear();
-  window.location.reload();
+  const user = getActiveUser();
+  clearInterval(heartbeatTimer);
+  clearTimeout(idleTimer);
+  
+  fetch(`${API_URL}?action=logoutUser&username=${user}`).finally(() => {
+    localStorage.clear();
+    window.location.reload();
+  });
 }
 
-document.addEventListener('DOMContentLoaded', () => { navigateTo('Login'); });
+let idleTimer;
+let heartbeatTimer;
+const IDLE_LIMIT = 10 * 60 * 1000; // 10 Menit dalam Milidetik
+const HEARTBEAT_INTERVAL = 2 * 60 * 1000; // 2 Menit (Kirim sinyal aktif ke Google Sheet)
+
+/**
+ * 1. FITUR AUTO LOGOUT (IDLE)
+ */
+function resetIdleTimer() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    Swal.fire({
+      title: 'Sesi Berakhir',
+      text: 'Anda tidak aktif selama 10 menit. Sistem otomatis logout demi keamanan.',
+      icon: 'info',
+      confirmButtonText: 'OK'
+    }).then(() => handleLogout());
+  }, IDLE_LIMIT);
+}
+
+// Jalankan listener untuk mendeteksi aktivitas user
+function startIdleMonitoring() {
+  window.onload = resetIdleTimer;
+  window.onmousemove = resetIdleTimer;
+  window.onmousedown = resetIdleTimer;
+  window.ontouchstart = resetIdleTimer;
+  window.onclick = resetIdleTimer;
+  window.onkeypress = resetIdleTimer;
+}
+
+/**
+ * 2. FITUR HEARTBEAT (Update Last Login di Sheet secara berkala)
+ */
+function startHeartbeat() {
+  heartbeatTimer = setInterval(() => {
+    const user = getActiveUser();
+    if (user) {
+      // Update kolom Last Login (F) tanpa merubah posisi menu
+      fetch(`${API_URL}?action=syncUserActivity&username=${user}&pageId=StayAlive&lane=Heartbeat`);
+    }
+  }, HEARTBEAT_INTERVAL);
+}
