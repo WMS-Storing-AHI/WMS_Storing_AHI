@@ -1,36 +1,38 @@
 <div class="flex h-screen overflow-hidden">
-  <!-- Sidebar Minimalist -->
-  <aside class="w-64 bg-dark text-white flex-shrink-0 flex flex-col">
-    <div class="p-6 border-b border-zinc-800">
-      <div class="text-lg font-bold">WMS<span class="text-industrial">PRO</span></div>
+  <!-- Sidebar -->
+  <aside class="w-64 bg-zinc-900 text-white flex-shrink-0 flex flex-col">
+    <div class="p-6 flex items-center gap-3 border-b border-zinc-800">
+        <div class="w-6 h-6 bg-amber-600 rounded"></div>
+        <div class="text-lg font-black tracking-tighter">WMS<span class="text-amber-600">PRO</span></div>
     </div>
     <nav class="flex-1 p-4 space-y-1 overflow-y-auto" id="sidebar-menu">
-      <!-- Menu dimuat di sini -->
+        <!-- Menu akan muncul di sini -->
     </nav>
-    <div class="p-4 border-t border-zinc-800 text-[10px] text-zinc-500 font-mono">
-      v3.2.0-STABLE
+    <div class="p-4 border-t border-zinc-800 flex items-center justify-between">
+        <span class="text-[9px] text-zinc-600 font-mono">NODE_AHI_MAIN</span>
+        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
     </div>
   </aside>
 
-  <!-- Main Content Area -->
+  <!-- Content Area -->
   <main class="flex-1 flex flex-col bg-zinc-100 overflow-hidden">
-    <!-- Top Header -->
-    <header class="h-16 bg-white border-b border-zinc-200 flex items-center justify-between px-6">
-      <div id="page-title" class="font-bold text-zinc-800 uppercase tracking-wide">Dashboard</div>
-      <div class="flex items-center gap-4">
+    <header class="h-16 bg-white border-b border-zinc-200 flex items-center justify-between px-8">
+      <div id="page-title" class="font-bold text-zinc-400 text-xs uppercase tracking-[0.2em]">Dashboard Control</div>
+      <div class="flex items-center gap-6">
         <div class="text-right">
-          <div class="text-xs font-bold text-zinc-900" id="user-display-name">USER</div>
-          <div class="text-[10px] text-zinc-500 uppercase" id="user-role">Role</div>
+          <div class="text-xs font-black text-zinc-900 uppercase" id="user-display-name">...</div>
+          <div class="text-[10px] text-amber-600 font-bold uppercase tracking-tighter" id="user-role">...</div>
         </div>
-        <button onclick="handleLogout()" class="p-2 text-zinc-400 hover:text-red-500 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <button onclick="handleLogout()" class="text-zinc-300 hover:text-red-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
       </div>
     </header>
-
-    <!-- Scrollable Content -->
-    <section id="content-area" class="flex-1 overflow-auto p-6">
-      <!-- Halaman dinamis muncul di sini -->
+    <section id="content-area" class="flex-1 overflow-auto p-8">
+        <!-- Halaman isi akan muncul di sini -->
+        <div class="flex items-center justify-center h-full">
+            <p class="text-zinc-400 font-mono text-[10px] uppercase tracking-[0.5em]">System Ready. Select Menu.</p>
+        </div>
     </section>
   </main>
 </div>
