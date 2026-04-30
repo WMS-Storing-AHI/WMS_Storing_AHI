@@ -60,3 +60,22 @@ body {
 /* Compact Scrollbar */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 10px; }
+
+/* Sidebar Group Header */
+#sidebar-menu div {
+  user-select: none;
+}
+
+/* Aktif Menu Style */
+.active-menu {
+  background-color: #27272a; /* Zinc-800 */
+  color: white !important;
+  border-right: 3px solid #d97706; /* Amber-600 */
+}
+
+/* Transisi Hover Icon */
+#sidebar-menu button span:first-child {
+  width: 24px;
+  display: inline-block;
+  text-align: center;
+}
