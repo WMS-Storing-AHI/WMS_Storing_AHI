@@ -1,8 +1,33 @@
 window.userData = { username: null, nama: null, role: null, menus: [] };
 
 const API_URL = "https://script.google.com/macros/s/AKfycbxnpvo68iaT0IZwBiuCvPOf_Cx8wqHx8t_SRUGlrU3N/dev"; // !!! WAJIB ISI !!!
-
 const getActiveUser = () => localStorage.getItem('activeUser');
+
+function callServer(params, callbackName) {
+  return new Promise((resolve, reject) => {
+    const callbackFunctionName = "cb_" + Math.random().toString(36).substring(7);
+    
+    // Siapkan fungsi penangkap data
+    window[callbackFunctionName] = (data) => {
+      delete window[callbackFunctionName];
+      document.getElementById(callbackFunctionName).remove();
+      resolve(data);
+    };
+
+    // Rakit URL
+    let url = API_URL + "?callback=" + callbackFunctionName;
+    for (let key in params) {
+      url += `&${key}=${encodeURIComponent(params[key])}`;
+    }
+
+    // Suntikkan script ke halaman
+    const script = document.createElement('script');
+    script.id = callbackFunctionName;
+    script.src = url;
+    script.onerror = () => reject("Koneksi Gagal");
+    document.body.appendChild(script);
+  });
+}
 
 // FUNGSI NAVIGASI
 function navigateTo(pageId, lane = "") {
