@@ -232,17 +232,39 @@ function renderAccordionFolder(parent, children, gId) {
   return container;
 }
 
-/* 1.1.3 - App Entry Point */
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Render Connection Badge
-  const badge = document.createElement('div');
-  badge.className = "fixed bottom-4 right-4 flex items-center gap-2 px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-full z-[9999] text-[10px] font-mono text-zinc-400 uppercase";
-  badge.innerHTML = `<div class="w-1.5 h-1.5 rounded-full ${API_CONFIG.IS_LOCAL ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}"></div>${API_CONFIG.IS_LOCAL ? 'Dev Mode' : 'Prod Mode (Live)'}`;
-  document.body.appendChild(badge);
+/* 1.1.4 - App Bootloader (Self-Executing Initialization) */
+function startSystem() {
+  // 1. Cek apakah ada Sesi User yang tersisa
+  const user = localStorage.getItem('activeUser');
+  if (user) {
+    // Bersihkan sesi lama di server jika ada (Optional: Silent Logout)
+    window.smartFetch({ action: "logoutUser", username: user }).catch(()=>console.log("No active session on server"));
+  }
+  
+  // Bersihkan memori lokal untuk memastikan mulai dari awal
+  localStorage.clear();
 
-  // 2. Jalankan Navigasi Pertama (Ke Login)
-  window.navigateTo('Login');
-});
+  // 2. Render Connection Badge
+  if (!document.getElementById('connection-badge')) {
+    const badge = document.createElement('div');
+    badge.id = 'connection-badge';
+    badge.className = "fixed bottom-4 right-4 flex items-center gap-2 px-3 py-1 bg-zinc-900 border border-zinc-800 rounded-full z-[9999] text-[10px] font-mono text-zinc-400 uppercase shadow-lg backdrop-blur-sm";
+    badge.innerHTML = `<div class="w-1.5 h-1.5 rounded-full ${API_CONFIG.IS_LOCAL ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}"></div>${API_CONFIG.IS_LOCAL ? 'Dev Mode' : 'Prod Mode (Live)'}`;
+    document.body.appendChild(badge);
+  }
+
+  // 3. Eksekusi Halaman Pertama
+  setTimeout(() => {
+    if (typeof window.navigateTo === 'function') {
+      window.navigateTo('Login');
+    } else {
+      console.error("CRITICAL: Navigation engine not found!");
+    }
+  }, 300); // Jeda sedikit agar transisi terasa smooth
+}
+
+// JALANKAN SEGERA SETELAH SCRIPT TERBACA
+startSystem();
 
 /* 4.5.2 - Mobile Toggle & Accordion Logic */
 window.toggleMobileSidebar = function() {
