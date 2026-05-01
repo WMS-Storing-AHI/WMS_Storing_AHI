@@ -1,30 +1,55 @@
-<div class="min-h-screen flex items-center justify-center p-4 bg-zinc-100">
-  <div class="w-full max-w-md bg-white border border-zinc-200 shadow-2xl rounded-md overflow-hidden">
-    <div class="h-2 bg-amber-600"></div>
-    <div class="p-8">
-      <div class="flex items-center gap-4 mb-10">
-        <div class="w-12 h-12 bg-zinc-900 text-white flex items-center justify-center rounded shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-        </div>
-        <div>
-          <h1 class="text-2xl font-black text-zinc-900 tracking-tighter">WMS<span class="text-amber-600">PRO</span></h1>
-          <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em]">Industrial Hub</p>
-        </div>
+<!-- 3.1.3 - UI Component (Tailwind + SaaS Design) -->
+<div class="min-h-screen flex items-center justify-center p-6 bg-[#fafafa]">
+  <div id="login-card" class="w-full max-w-[400px] transition-all duration-500 ease-in-out">
+    
+    <!-- BRANDING SECTION -->
+    <div class="text-center mb-8 space-y-2">
+      <div class="inline-flex items-center justify-center w-14 h-14 bg-zinc-900 rounded-2xl shadow-xl mb-4">
+        <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+          <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
+        </svg>
       </div>
-      <form onsubmit="event.preventDefault(); handleLogin(this.username.value, this.password.value);" class="space-y-6">
-        <div>
-          <label class="block text-[10px] font-black uppercase text-zinc-500 mb-2 tracking-widest">User Terminal ID</label>
-          <input type="text" name="username" class="input-industrial w-full font-data text-sm" placeholder="ID-PENGGUNA" required>
+      <h1 class="text-3xl font-black tracking-tighter text-zinc-900 uppercase italic">
+        WMS<span class="text-amber-500">PRO</span>
+      </h1>
+      <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em]">
+        INDUSTRIAL RESOURCE CONTROL
+      </p>
+    </div>
+
+    <!-- LOGIN FORM CARD (Bento Style) -->
+    <div class="bg-white border border-zinc-200 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
+      <form onsubmit="handleLogin(event)" class="space-y-6">
+        <div class="space-y-1">
+          <label class="text-[10px] font-bold text-zinc-500 uppercase ml-1">Terminal ID</label>
+          <input type="text" name="username" required
+            class="w-full h-12 px-4 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all outline-none font-mono text-sm"
+            placeholder="NIK / ID">
         </div>
-        <div>
-          <label class="block text-[10px] font-black uppercase text-zinc-500 mb-2 tracking-widest">Access Key</label>
-          <input type="password" name="password" class="input-industrial w-full text-sm" placeholder="••••••••" required>
+        
+        <div class="space-y-1">
+          <label class="text-[10px] font-bold text-zinc-500 uppercase ml-1">Security Key</label>
+          <input type="password" name="password" required
+            class="w-full h-12 px-4 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all outline-none text-sm"
+            placeholder="••••••••">
         </div>
-        <button type="submit" id="login-btn" class="w-full btn-industrial py-4 shadow-lg shadow-amber-600/20">Otorisasi Masuk →</button>
+
+        <button type="submit" id="login-btn"
+          class="w-full h-12 bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-zinc-200 transition-all active:scale-[0.98]">
+          AUTHORIZE ACCESS <span class="ml-2">→</span>
+        </button>
       </form>
     </div>
-    <div class="bg-zinc-50 border-t border-zinc-100 p-4 text-center">
-      <span class="text-[9px] text-zinc-400 font-mono tracking-widest">V.3.2 // SYSTEM STABLE</span>
+
+    <!-- FOOTER INFO -->
+    <div class="mt-8 flex items-center justify-between px-2">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+        <span class="text-[9px] font-mono text-zinc-400 uppercase tracking-tighter">Secure Link Active</span>
+      </div>
+      <span class="text-[9px] font-mono text-zinc-400 uppercase">Node: AHI-SYS-V3</span>
     </div>
+
   </div>
 </div>
