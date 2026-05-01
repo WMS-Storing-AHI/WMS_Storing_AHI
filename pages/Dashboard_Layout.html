@@ -50,61 +50,58 @@ async function startSessionGuardian() {
 }
 </script>
 
-<div class="flex h-screen overflow-hidden bg-white selection:bg-zinc-950 selection:text-white">
+<div class="flex h-screen overflow-hidden bg-white selection:bg-zinc-950 selection:text-white flex-col md:flex-row">
   
-  <!-- SIDEBAR: ULTRA SHARP INDUSTRIAL -->
-  <aside class="w-72 bg-zinc-950 text-zinc-400 flex flex-col border-r border-zinc-200">
-    <div class="p-10 border-b border-zinc-900">
-      <div class="flex items-center gap-3 mb-6">
+  <!-- 1. MOBILE TOP BAR (Only visible < md) -->
+  <header class="md:hidden h-16 bg-zinc-950 text-white flex items-center justify-between px-6 z-[60] border-b border-zinc-800">
+    <div class="flex items-center gap-3">
+      <div class="w-1 h-6 bg-amber-500"></div>
+      <h2 class="text-lg font-black tracking-tighter uppercase italic">WMS<span class="text-zinc-500 font-light">PRO</span></h2>
+    </div>
+    <button onclick="window.toggleMobileSidebar()" class="p-2 hover:bg-zinc-900 transition-colors">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+  </header>
+
+  <!-- 2. MOBILE OVERLAY -->
+  <div id="sidebar-overlay" onclick="window.toggleMobileSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden backdrop-blur-sm"></div>
+
+  <!-- 3. SIDEBAR (Sharp Drawer) -->
+  <aside id="main-sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-zinc-950 text-zinc-400 flex flex-col border-r border-zinc-200 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none">
+    <div class="p-10 border-b border-zinc-900 hidden md:block">
+      <div class="flex items-center gap-3 mb-4">
         <div class="w-2 h-8 bg-amber-500"></div>
         <h2 class="text-2xl font-black tracking-tighter text-white uppercase italic">WMS<span class="text-zinc-600 font-light">PRO</span></h2>
       </div>
-      <p class="text-[9px] font-mono text-zinc-700 uppercase tracking-[0.4em]">Node Cluster: AHI-V3</p>
+      <p class="text-[9px] font-mono text-zinc-700 uppercase tracking-[0.4em]">Node: AHI-V3</p>
     </div>
 
-    <nav id="exec-sidebar-nav" class="flex-1 overflow-y-auto scrollbar-hide">
-      <!-- Grouped Menus Injected Here -->
+    <!-- Scrollable Menu Area -->
+    <nav id="exec-sidebar-nav" class="flex-1 overflow-y-auto scrollbar-hide py-4 md:py-0">
+      <!-- Logic Accordion Injected Here -->
     </nav>
 
+    <!-- User Footer -->
     <div class="p-8 border-t border-zinc-900 bg-black flex items-center justify-between">
       <div class="flex flex-col gap-1">
-        <span id="exec-name" class="text-[11px] font-black text-white uppercase tracking-wider italic leading-none">---</span>
+        <span id="exec-name" class="text-[11px] font-black text-white uppercase tracking-wider italic">---</span>
         <span id="exec-role" class="text-[9px] font-bold text-zinc-600 uppercase tracking-tighter">---</span>
       </div>
-      <button onclick="handleLogout()" class="w-10 h-10 flex items-center justify-center bg-zinc-900 text-zinc-500 hover:text-white transition-all">
+      <button onclick="handleLogout()" class="w-10 h-10 flex items-center justify-center bg-zinc-900 text-zinc-500 hover:text-white">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
       </button>
     </div>
   </aside>
 
-  <!-- MAIN VIEWPORT -->
-  <main class="flex-1 flex flex-col">
-    <header class="h-20 bg-white border-b border-zinc-100 flex items-center justify-between px-12">
-      <div class="flex items-center gap-8">
-        <div class="flex flex-col">
-          <span class="text-[9px] font-black text-zinc-300 uppercase tracking-[0.5em] mb-1">Current Sector</span>
-          <h3 id="current-page-title" class="text-xs font-black uppercase tracking-[0.2em] text-zinc-950">System Monitoring</h3>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-8">
-        <div class="h-10 w-[1px] bg-zinc-100"></div>
-        <div class="flex flex-col items-end">
-          <span class="text-[9px] font-mono text-zinc-300 uppercase">Status: 200 OK</span>
-          <div class="flex items-center gap-2">
-            <div class="w-1.5 h-1.5 bg-emerald-500"></div>
-            <span class="text-[9px] font-black text-zinc-950 uppercase">Live_Node_Primary</span>
-          </div>
-        </div>
-      </div>
+  <!-- 4. MAIN CONTENT AREA -->
+  <main class="flex-1 flex flex-col min-w-0">
+    <header class="h-20 bg-white border-b border-zinc-100 hidden md:flex items-center justify-between px-12">
+      <h3 id="current-page-title" class="text-xs font-black uppercase tracking-[0.5em] text-zinc-950">System Monitoring</h3>
+      <span class="text-[9px] font-mono text-zinc-300 uppercase">Live_Node_Primary</span>
     </header>
 
-    <!-- CONTENT FRAME -->
-    <div id="content-area" class="flex-1 overflow-y-auto bg-[#fcfcfc] p-16">
-      <!-- Dynamic Pages Injected Here -->
-      <div class="flex flex-col items-center justify-center h-full opacity-10">
-        <h1 class="text-[80px] font-black tracking-tighter uppercase italic">Ready</h1>
-      </div>
+    <div id="content-area" class="flex-1 overflow-y-auto bg-[#fcfcfc] p-6 md:p-16">
+      <!-- Dynamic Pages -->
     </div>
   </main>
 </div>
