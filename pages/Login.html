@@ -1,8 +1,15 @@
 <script>
-  /* 3.1.1 - UI Config */
-  const UI_BRAND = { name: "WMS PRO", node: "AHI-NODE-01" };
 
-  /* 3.1.2 - Local Login Logic */
+  /* 3.2.1 - UI Branding & Sharp System */
+const UI_THEME = {
+  cornerRadius: "rounded-none", // Sharp Executive Style
+  borderColor: "border-zinc-200",
+  focusRing: "focus:ring-0 focus:border-zinc-950",
+  buttonStyle: "bg-zinc-950 hover:bg-zinc-800 text-white"
+};
+
+  
+  /* 3.2.2 - Core Login Logic (Inherited from V.01) */
   async function handleLogin(e) {
     e.preventDefault();
     const btn = document.getElementById('login-btn');
@@ -10,10 +17,9 @@
     const data = Object.fromEntries(formData.entries());
 
     btn.disabled = true;
-    btn.innerHTML = `<span class="animate-spin mr-2 inline-block">◌</span> VERIFYING...`;
+    btn.innerHTML = `<span class="animate-pulse tracking-widest">AUTHENTICATING...</span>`;
 
     try {
-      // Memanggil fungsi global dari script.js (Modul 2)
       const res = await window.smartFetch({
         action: "checkLogin",
         username: data.username,
@@ -22,63 +28,86 @@
 
       if (res.status === "success") {
         localStorage.setItem("activeUser", res.username);
-        window.userData = res; // Simpan data user ke global state
+        window.userData = res;
         
-        // Animasi Transisi Keluar
-        document.getElementById('login-container').classList.add('opacity-0', 'scale-95');
+        // Executive Transition: Slide-out
+        document.getElementById('login-panel').classList.add('-translate-x-10', 'opacity-0');
         setTimeout(() => window.navigateTo('Dashboard_Layout'), 300);
       } else {
         throw new Error(res.message);
       }
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'AUTH_ERROR', text: err.message || "Koneksi Gagal" });
+      Swal.fire({ 
+        icon: 'error', 
+        title: 'ACCESS_DENIED', 
+        text: err.message || "Connection Error",
+        confirmButtonText: 'RETRY',
+        confirmButtonColor: '#000000',
+        customClass: { popup: 'rounded-none' } 
+      });
       btn.disabled = false;
-      btn.innerHTML = `AUTHORIZE ACCESS →`;
+      btn.innerHTML = `AUTHORIZE ACCESS <span class="ml-2 font-light">→</span>`;
     }
   }
 </script>
 
-<div id="login-container" class="min-h-screen flex items-center justify-center p-6 bg-[#fafafa] transition-all duration-500">
-  <div class="w-full max-w-[400px]">
+<!-- 3.2.3 - UI Component: Sharp Executive SaaS -->
+<div class="min-h-screen flex items-center justify-center p-0 bg-white selection:bg-zinc-950 selection:text-white">
+  
+  <div id="login-panel" class="w-full max-w-[440px] p-12 transition-all duration-500 ease-in-out border border-zinc-100 shadow-2xl shadow-zinc-100">
     
-    <!-- BRANDING -->
-    <div class="text-center mb-10">
-      <div class="inline-flex items-center justify-center w-16 h-16 bg-zinc-950 rounded-[22px] shadow-2xl mb-6 ring-8 ring-zinc-950/5">
-        <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-          <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
-        </svg>
+    <!-- BRANDING: MINIMALIST INDUSTRIAL -->
+    <div class="mb-12">
+      <div class="inline-block px-3 py-1 bg-zinc-950 text-white text-[10px] font-bold tracking-[0.4em] mb-6 uppercase">
+        System Node 01
       </div>
-      <h1 class="text-3xl font-black tracking-tighter text-zinc-900 italic">WMS<span class="text-amber-500">PRO</span></h1>
-      <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.4em] mt-1">Industrial Intelligence</p>
+      <h1 class="text-4xl font-black tracking-tighter text-zinc-900 uppercase">
+        WMS<span class="text-zinc-400 font-light">PRO</span>
+      </h1>
+      <div class="w-12 h-1 bg-zinc-950 mt-2"></div>
     </div>
 
-    <!-- FORM CARD -->
-    <div class="bg-white border border-zinc-200 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] p-10 backdrop-blur-sm">
-      <form onsubmit="handleLogin(event)" class="space-y-6">
-        <div class="space-y-1.5">
-          <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Terminal ID</label>
-          <input type="text" name="username" required class="w-full h-14 px-5 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all outline-none font-mono text-sm" placeholder="ID / NIK">
-        </div>
-        
-        <div class="space-y-1.5">
-          <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Access Key</label>
-          <input type="password" name="password" required class="w-full h-14 px-5 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all outline-none text-sm" placeholder="••••••••">
-        </div>
+    <!-- FORM: SHARP SaaS STYLE -->
+    <form onsubmit="handleLogin(event)" class="space-y-8">
+      <div class="group">
+        <label class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 block group-focus-within:text-zinc-950 transition-colors">
+          Terminal Identifier
+        </label>
+        <input type="text" name="username" required 
+          class="w-full h-12 bg-transparent border-b border-zinc-200 focus:border-zinc-950 transition-all outline-none font-mono text-sm placeholder:text-zinc-200"
+          placeholder="ID.NIK.USER">
+      </div>
+      
+      <div class="group">
+        <label class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 block group-focus-within:text-zinc-950 transition-colors">
+          Security Access Key
+        </label>
+        <input type="password" name="password" required 
+          class="w-full h-12 bg-transparent border-b border-zinc-200 focus:border-zinc-950 transition-all outline-none text-sm placeholder:text-zinc-200"
+          placeholder="PASSWORD_REQUIRED">
+      </div>
 
-        <button type="submit" id="login-btn" class="w-full h-14 bg-zinc-950 hover:bg-zinc-900 text-white font-bold text-[11px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-zinc-950/20 transition-all active:scale-95">
-          AUTHORIZE ACCESS →
+      <div class="pt-4">
+        <button type="submit" id="login-btn" 
+          class="w-full h-14 bg-zinc-950 text-white font-bold text-[11px] uppercase tracking-[0.3em] rounded-none hover:bg-zinc-800 transition-all flex items-center justify-center group">
+          AUTHORIZE ACCESS 
+          <span class="ml-4 group-hover:translate-x-2 transition-transform font-light italic">→</span>
         </button>
-      </form>
-    </div>
-
-    <!-- FOOTER -->
-    <div class="mt-10 flex items-center justify-between px-4 text-zinc-400">
-      <div class="flex items-center gap-2">
-        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-        <span class="text-[9px] font-mono uppercase tracking-tighter">System Live</span>
       </div>
-      <span class="text-[9px] font-mono uppercase">Node: AHI-SYS-V3</span>
+    </form>
+
+    <!-- FOOTER: SYSTEM DIAGNOSTIC -->
+    <div class="mt-16 pt-8 border-t border-zinc-50 flex items-center justify-between">
+      <div class="flex flex-col gap-1">
+        <span class="text-[9px] font-mono text-zinc-300 uppercase tracking-widest italic">Encrypted Session</span>
+        <div class="flex items-center gap-2">
+          <div class="w-1.5 h-1.5 bg-emerald-500"></div>
+          <span class="text-[9px] font-black text-zinc-900 uppercase">Live.Stable</span>
+        </div>
+      </div>
+      <div class="text-right">
+        <span class="text-[9px] font-mono text-zinc-300 uppercase">Ahi-V3 // 2024</span>
+      </div>
     </div>
 
   </div>
