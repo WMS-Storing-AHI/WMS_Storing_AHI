@@ -93,92 +93,44 @@ window.smartFetch = function(params) {
 ========================================= */
 window.navigateTo = async function(pageId) {
   const container = document.getElementById('app-container');
-
+  
   if (!container) {
-    console.error("❌ #app-container TIDAK DITEMUKAN di HTML!");
+    alert("Kritis: Elemen id='app-container' tidak ditemukan di index.html!");
     return;
   }
 
-  console.log("🔄 Navigating to:", pageId); // Debug
+  console.log("Mencoba memuat halaman:", pageId);
 
-  // Coba beberapa kemungkinan path
-  const paths = [
-    `./pages/${pageId}.html`,
-    `/WMS_Storing_AHI/pages/${pageId}.html`,  // ← GitHub Pages path
-    `pages/${pageId}.html`
-  ];
-
-  let htmlContent = null;
-  let successPath = null;
-
-  for (let path of paths) {
-    try {
-      console.log("📂 Mencoba path:", path); // Debug
-      const res = await fetch(path + `?t=${Date.now()}`);
-      console.log("📂 Response status:", res.status, "untuk path:", path); // Debug
-
-      if (res.ok) {
-        htmlContent = await res.text();
-        successPath = path;
-        console.log("✅ Berhasil load dari:", path); // Debug
-        break;
-      }
-    } catch (err) {
-      console.warn("⚠️ Gagal path:", path, err.message);
+  try {
+    // Gunakan path absolut untuk GitHub Pages agar lebih aman
+    const path = `./pages/${pageId}.html?t=${Date.now()}`;
+    const res = await fetch(path);
+    
+    if (!res.ok) {
+      throw new Error(`Gagal fetch file: ${path} (Status: ${res.status})`);
     }
-  }
 
-  if (htmlContent) {
-    container.innerHTML = htmlContent;
-
-    // Jalankan script di dalam halaman
-    container.querySelectorAll('script').forEach(oldScript => {
-      const newScript = document.createElement('script');
-      newScript.text = oldScript.textContent;
-      document.body.appendChild(newScript);
-      oldScript.remove();
+    const html = await res.text();
+    container.innerHTML = html;
+    console.log("Berhasil memuat HTML untuk:", pageId);
+    
+    // Jalankan script
+    const scripts = container.querySelectorAll('script');
+    scripts.forEach(s => {
+      const n = document.createElement('script');
+      n.text = s.text;
+      document.body.appendChild(n);
     });
 
-    if (pageId === 'Dashboard_Layout') {
-      setTimeout(window.initializeDashboard, 150);
-    }
+    if (pageId === 'Dashboard_Layout') setTimeout(window.initializeDashboard, 100);
 
-  } else {
-    // Semua path gagal
-    console.error("❌ Semua path gagal untuk:", pageId);
-
-    if (pageId !== 'Login') {
-      window.navigateTo('Login');
-    } else {
-      // Tampilkan form login darurat langsung di page
-      container.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:center;
-        height:100vh;background:#0a0a0a;font-family:monospace;">
-          <div style="background:#111;padding:40px;border:1px solid #333;
-          border-radius:8px;width:360px;">
-
-            <div style="color:#f59e0b;font-size:20px;font-weight:bold;
-            margin-bottom:4px;">⚠️ FILE LOGIN.HTML TIDAK DITEMUKAN</div>
-
-            <div style="color:#666;font-size:11px;margin-bottom:24px;">
-              Pastikan file <code style="color:#f59e0b;">pages/Login.html</code> 
-              ada di repository GitHub Anda.
-            </div>
-
-            <div style="color:#ef4444;font-size:11px;margin-bottom:16px;">
-              Path yang dicoba:<br>
-              ${paths.map(p => `• ${p}`).join('<br>')}
-            </div>
-
-            <button onclick="window.navigateTo('Login')"
-              style="width:100%;padding:12px;background:#f59e0b;color:#000;
-              border:none;cursor:pointer;font-weight:bold;border-radius:4px;
-              font-family:monospace;">
-              🔄 COBA LAGI
-            </button>
-          </div>
-        </div>`;
-    }
+  } catch (e) {
+    console.error("Kesalahan Navigasi:", e.message);
+    container.innerHTML = `<div style="color:red; padding:20px;">
+      <h2>Gagal Memuat Halaman</h2>
+      <p>Error: ${e.message}</p>
+      <p>Pastikan file <b>pages/${pageId}.html</b> sudah di-upload ke GitHub.</p>
+    </div>`;
   }
 };
 
