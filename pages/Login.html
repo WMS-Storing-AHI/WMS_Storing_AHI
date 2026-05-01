@@ -51,64 +51,61 @@ window.handleLogin = async function(e) {
   
 </script>
 
-<!-- 3.2.3 - UI Component: Sharp Executive SaaS -->
-<div class="min-h-screen flex items-center justify-center p-0 bg-white selection:bg-zinc-950 selection:text-white">
+<div class="flex h-screen overflow-hidden bg-white selection:bg-zinc-950 selection:text-white">
   
-  <div id="login-panel" class="w-full max-w-[440px] p-12 transition-all duration-500 ease-in-out border border-zinc-100 shadow-2xl shadow-zinc-100">
-    
-    <!-- BRANDING: MINIMALIST INDUSTRIAL -->
-    <div class="mb-12">
-      <div class="inline-block px-3 py-1 bg-zinc-950 text-white text-[10px] font-bold tracking-[0.4em] mb-6 uppercase">
-        System Node 01
+  <!-- SIDEBAR: ULTRA SHARP INDUSTRIAL -->
+  <aside class="w-72 bg-zinc-950 text-zinc-400 flex flex-col border-r border-zinc-200">
+    <div class="p-10 border-b border-zinc-900">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-2 h-8 bg-amber-500"></div>
+        <h2 class="text-2xl font-black tracking-tighter text-white uppercase italic">WMS<span class="text-zinc-600 font-light">PRO</span></h2>
       </div>
-      <h1 class="text-4xl font-black tracking-tighter text-zinc-900 uppercase">
-        WMS<span class="text-zinc-400 font-light">PRO</span>
-      </h1>
-      <div class="w-12 h-1 bg-zinc-950 mt-2"></div>
+      <p class="text-[9px] font-mono text-zinc-700 uppercase tracking-[0.4em]">Node Cluster: AHI-V3</p>
     </div>
 
-    <!-- FORM: SHARP SaaS STYLE -->
-    <form onsubmit="handleLogin(event)" class="space-y-8">
-      <div class="group">
-        <label class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 block group-focus-within:text-zinc-950 transition-colors">
-          Terminal Identifier
-        </label>
-        <input type="text" name="username" required 
-          class="w-full h-12 bg-transparent border-b border-zinc-200 focus:border-zinc-950 transition-all outline-none font-mono text-sm placeholder:text-zinc-200"
-          placeholder="ID.NIK.USER">
-      </div>
-      
-      <div class="group">
-        <label class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 block group-focus-within:text-zinc-950 transition-colors">
-          Security Access Key
-        </label>
-        <input type="password" name="password" required 
-          class="w-full h-12 bg-transparent border-b border-zinc-200 focus:border-zinc-950 transition-all outline-none text-sm placeholder:text-zinc-200"
-          placeholder="PASSWORD_REQUIRED">
-      </div>
+    <nav id="exec-sidebar-nav" class="flex-1 overflow-y-auto scrollbar-hide">
+      <!-- Grouped Menus Injected Here -->
+    </nav>
 
-      <div class="pt-4">
-        <button type="submit" id="login-btn" 
-          class="w-full h-14 bg-zinc-950 text-white font-bold text-[11px] uppercase tracking-[0.3em] rounded-none hover:bg-zinc-800 transition-all flex items-center justify-center group">
-          AUTHORIZE ACCESS 
-          <span class="ml-4 group-hover:translate-x-2 transition-transform font-light italic">→</span>
-        </button>
-      </div>
-    </form>
-
-    <!-- FOOTER: SYSTEM DIAGNOSTIC -->
-    <div class="mt-16 pt-8 border-t border-zinc-50 flex items-center justify-between">
+    <div class="p-8 border-t border-zinc-900 bg-black flex items-center justify-between">
       <div class="flex flex-col gap-1">
-        <span class="text-[9px] font-mono text-zinc-300 uppercase tracking-widest italic">Encrypted Session</span>
-        <div class="flex items-center gap-2">
-          <div class="w-1.5 h-1.5 bg-emerald-500"></div>
-          <span class="text-[9px] font-black text-zinc-900 uppercase">Live.Stable</span>
+        <span id="exec-name" class="text-[11px] font-black text-white uppercase tracking-wider italic leading-none">---</span>
+        <span id="exec-role" class="text-[9px] font-bold text-zinc-600 uppercase tracking-tighter">---</span>
+      </div>
+      <button onclick="handleLogout()" class="w-10 h-10 flex items-center justify-center bg-zinc-900 text-zinc-500 hover:text-white transition-all">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEWPORT -->
+  <main class="flex-1 flex flex-col">
+    <header class="h-20 bg-white border-b border-zinc-100 flex items-center justify-between px-12">
+      <div class="flex items-center gap-8">
+        <div class="flex flex-col">
+          <span class="text-[9px] font-black text-zinc-300 uppercase tracking-[0.5em] mb-1">Current Sector</span>
+          <h3 id="current-page-title" class="text-xs font-black uppercase tracking-[0.2em] text-zinc-950">System Monitoring</h3>
         </div>
       </div>
-      <div class="text-right">
-        <span class="text-[9px] font-mono text-zinc-300 uppercase">Ahi-V3 // 2024</span>
+      
+      <div class="flex items-center gap-8">
+        <div class="h-10 w-[1px] bg-zinc-100"></div>
+        <div class="flex flex-col items-end">
+          <span class="text-[9px] font-mono text-zinc-300 uppercase">Status: 200 OK</span>
+          <div class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 bg-emerald-500"></div>
+            <span class="text-[9px] font-black text-zinc-950 uppercase">Live_Node_Primary</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT FRAME -->
+    <div id="content-area" class="flex-1 overflow-y-auto bg-[#fcfcfc] p-16">
+      <!-- Dynamic Pages Injected Here -->
+      <div class="flex flex-col items-center justify-center h-full opacity-10">
+        <h1 class="text-[80px] font-black tracking-tighter uppercase italic">Ready</h1>
       </div>
     </div>
-
-  </div>
+  </main>
 </div>
