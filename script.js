@@ -60,3 +60,54 @@ function renderDevBadge() {
 }
 
 document.addEventListener('DOMContentLoaded', renderDevBadge);
+
+/* 3.1.1 - UI Config & Branding */
+const UI_CONFIG = {
+  brand: "WMS PRO",
+  subBrand: "INDUSTRIAL HUB",
+  tagline: "Enterprise Resource Monitoring",
+  nodeId: "NODE-AHI-01"
+};
+
+/* 3.1.2 - Login Logic via smartFetch */
+window.handleLogin = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="animate-spin mr-2">◌</span> VERIFYING...`;
+  }
+
+  try {
+    // Memanggil Mesin dari Modul 2
+    const res = await window.smartFetch({
+      action: "checkLogin",
+      username: data.username,
+      password: data.password
+    });
+
+    if (res.status === "success") {
+      localStorage.setItem("activeUser", res.username);
+      window.userData = res;
+      // Transisi Halus (Framer Motion Style via Tailwind)
+      document.getElementById('login-card').classList.add('opacity-0', 'translate-y-4');
+      setTimeout(() => navigateTo('Dashboard_Layout'), 300);
+    } else {
+      throw new Error(res.message);
+    }
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'AUTH_ERROR',
+      text: err.message || "Koneksi ke server gagal",
+      confirmButtonColor: '#18181b'
+    });
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `AUTHORIZE ACCESS <span class="ml-2">→</span>`;
+    }
+  }
+};
