@@ -1,6 +1,6 @@
 window.userData = { username: null, nama: null, role: null, menus: [] };
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxBzk5lDthR9-_yNW81oBvKM50n4IboBl_g7QYbcXxjpRxJERoJMlOvJWmrD2JYjZli8Q/exec"; // !!! WAJIB ISI !!!
+const API_URL = "https://script.google.com/macros/s/AKfycbxnpvo68iaT0IZwBiuCvPOf_Cx8wqHx8t_SRUGlrU3N/dev"; // !!! WAJIB ISI !!!
 
 const getActiveUser = () => localStorage.getItem('activeUser');
 
