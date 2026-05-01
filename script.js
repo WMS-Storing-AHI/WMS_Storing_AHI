@@ -52,35 +52,47 @@ enforceSingleTab();
 
 /* 1.1.1 - Configuration & Environment Setup */
 const API_CONFIG = {
-  // Masukkan URL Apps Script Anda di sini
-  DEV_URL: "https://script.google.com/macros/s/AKfycbxnpvo68iaT0IZwBiuCvPOf_Cx8wqHx8t_SRUGlrU3N/dev", 
-  PROD_URL: "https://script.google.com/macros/s/AKfycbxJwZogtILb2PJPGx7K5XVtpeZzhidtnmfFl8tG45uJVpbMn6LIK74_-CXr4Stqyd-LAQ/exec",
-  IS_LOCAL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  // KUNCI: Kita hanya gunakan link /exec untuk semua perangkat (HP/PC)
+  // Pastikan link ini adalah yang paling terbaru dari "Manage Deployments"
+  URL: "https://script.google.com/macros/s/AKfycbxJwZogtiLb2PJPgx7K5XVtpeZzhidtnmfFl8tg45uJVpbMn6lIK74_-CXr4Stqyd-LAQ/exec"
 };
 
-window.userData = { username: null, nama: null, role: null, menus: [] };
+window.userData = { username: null, nama: null, role: null, menus: [], sessionID: null };
 
 /* 1.1.2 - Core Logic: Fetch, Navigate, Auth */
 
-// A. Mesin Pengambil Data (JSONP Bypass)
+/* 1.1.2 - Global JSONP Fetcher */
 window.smartFetch = async function(params) {
-  const baseUrl = API_CONFIG.IS_LOCAL ? API_CONFIG.DEV_URL : API_CONFIG.PROD_URL;
+  const baseUrl = API_CONFIG.URL; // Murni menggunakan jalur /exec
   const callbackName = `cb_${Math.random().toString(36).substring(7)}`;
+
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.id = callbackName;
+    
     window[callbackName] = (data) => {
       resolve(data);
       document.getElementById(callbackName)?.remove();
       delete window[callbackName];
     };
+
     const queryString = new URLSearchParams({ ...params, callback: callbackName }).toString();
     script.src = `${baseUrl}?${queryString}`;
-    script.onerror = () => reject("Network Error");
+    
+    // Timeout jika server sibuk
+    const timer = setTimeout(() => {
+      document.getElementById(callbackName)?.remove();
+      reject("TIMEOUT: Server Google lambat, coba klik sekali lagi.");
+    }, 15000);
+
+    script.onerror = () => {
+      clearTimeout(timer);
+      reject("SECURITY_ALERT: Akses ditolak Google (Cek link /exec Anda)");
+    };
+    
     document.body.appendChild(script);
   });
 };
-
 /* 4.6.2 - Advanced Dashboard & Navigation Logic */
 
 // 1. Fungsi Logout dengan Pembersihan Sesi
