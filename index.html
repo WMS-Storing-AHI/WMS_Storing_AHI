@@ -1,30 +1,22 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WMS PRO | Industrial System</title>
-    
-    <!-- Fonts & Libraries -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="style.css">
-    
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: { industrial: '#d97706', dark: '#18181b' }
-          }
-        }
-      }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WMS PRO | Industrial Node</title>
+  <!-- Tailwind & Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="antialiased bg-zinc-100">
-    <div id="app-container" class="min-h-screen">
-        <!-- Konten akan dimuat secara dinamis di sini -->
+<body class="antialiased bg-[#fafafa]">
+  <!-- Wadah Utama Navigasi Modern -->
+  <div id="app-container">
+    <div class="h-screen flex items-center justify-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
     </div>
-    <script src="script.js"></script>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
