@@ -86,7 +86,21 @@ document.addEventListener('DOMContentLoaded', () => {
   window.navigateTo('Login');
 });
 
-/* 4.2.2 - Advanced Sidebar Renderer with Grouping */
+/* 4.5.2 - Mobile Toggle & Accordion Logic */
+window.toggleMobileSidebar = function() {
+  const sidebar = document.getElementById('main-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+};
+
+window.toggleGroup = function(groupId) {
+  const content = document.getElementById(groupId);
+  const icon = document.getElementById('icon-' + groupId);
+  content.classList.toggle('hidden');
+  if(icon) icon.classList.toggle('rotate-180');
+};
+
 window.initializeDashboard = function() {
   const user = window.userData;
   if (!user || !user.username) return window.navigateTo('Login');
@@ -97,28 +111,30 @@ window.initializeDashboard = function() {
   const menuContainer = document.getElementById('exec-sidebar-nav');
   menuContainer.innerHTML = '';
 
-  // 1. Grouping Logic: Pisahkan menu berdasarkan Parent
+  // 1. Grouping Data (Sheet Column A)
   const groups = {};
   user.menus.forEach(m => {
-    const p = m.parent || "MAIN_ACCESS";
+    const p = m.parent || "DEFAULT_ACCESS";
     if (!groups[p]) groups[p] = [];
     groups[p].push(m);
   });
 
-  // 2. Render Loop
-  Object.keys(groups).forEach(groupName => {
+  // 2. Render Accordion Structure
+  Object.keys(groups).forEach((gName, index) => {
+    const safeId = `grp-${index}`;
     const section = document.createElement('div');
-    section.className = "border-b border-zinc-900";
+    section.className = "border-b border-zinc-900/50";
     
-    // Header Group (FOLDER)
     section.innerHTML = `
-      <div class="px-6 py-3 bg-zinc-900/30 flex items-center justify-between group cursor-default">
-        <span class="text-[9px] font-black text-zinc-600 uppercase tracking-[0.3em]">${groupName}</span>
-      </div>
-      <div id="group-${groupName.replace(/\s+/g, '')}" class="flex flex-col">
-        ${groups[groupName].map(m => `
-          <button onclick="navigateTo('${m.pageId}')" 
-            class="w-full flex items-center gap-4 px-8 py-3.5 text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] hover:bg-zinc-900 hover:text-white transition-all border-l-2 border-transparent hover:border-amber-500">
+      <button onclick="window.toggleGroup('${safeId}')" 
+        class="w-full px-6 py-4 flex items-center justify-between bg-zinc-900/20 hover:bg-zinc-900 transition-colors">
+        <span class="text-[9px] font-black text-zinc-500 uppercase tracking-[0.3em]">${gName}</span>
+        <svg id="icon-${safeId}" class="w-3 h-3 text-zinc-700 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3"></path></svg>
+      </button>
+      <div id="${safeId}" class="hidden flex flex-col bg-black/20">
+        ${groups[gName].map(m => `
+          <button onclick="navigateTo('${m.pageId}'); if(window.innerWidth < 768) toggleMobileSidebar();" 
+            class="w-full flex items-center gap-4 px-10 py-3.5 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-white border-l-2 border-transparent hover:border-amber-500 transition-all">
             <span class="text-xs">${m.icon || '○'}</span>
             <span class="truncate">${m.name}</span>
           </button>
@@ -127,8 +143,4 @@ window.initializeDashboard = function() {
     `;
     menuContainer.appendChild(section);
   });
-
-  // Jalankan Sesi Guardian (Cek tiap 30 detik)
-  if(!window.sessionGuardianActive) startSessionGuardian();
 };
-
