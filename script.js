@@ -111,3 +111,38 @@ window.handleLogin = async function(e) {
     }
   }
 };
+
+/* 4.1.1 - Dashboard State & Profile Setup */
+window.dashboardState = {
+  isSidebarOpen: window.innerWidth > 768,
+  activePage: 'Inquiry',
+  lastSync: new Date().toLocaleTimeString()
+};
+
+/* 4.1.2 - Dashboard Controller & Initializer */
+window.initializeDashboard = function() {
+  const user = window.userData;
+  if (!user || !user.username) return navigateTo('Login');
+
+  // Update Profile UI
+  const elements = {
+    name: document.getElementById('user-name-display'),
+    role: document.getElementById('user-role-display'),
+    nameMob: document.getElementById('user-name-mobile')
+  };
+
+  if(elements.name) elements.name.innerText = user.nama;
+  if(elements.role) elements.role.innerText = user.role;
+  if(elements.nameMob) elements.nameMob.innerText = user.nama.split(' ')[0];
+
+  // Render Modular Sidebar
+  renderSidebarMenu(user.menus);
+};
+
+window.toggleSidebar = function() {
+  const sidebar = document.getElementById('sidebar-container');
+  const overlay = document.getElementById('sidebar-overlay');
+  
+  sidebar.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+};
