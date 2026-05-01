@@ -1,9 +1,9 @@
 /* 2.1.1 - Konstanta & Deteksi Lingkungan */
 const API_CONFIG = {
   // Masukkan URL /dev (Test Deployment) untuk pengerjaan lokal
-  DEV_URL: "https://script.google.com/macros/s/AKfycbxBzk5lDthR9-_yNW81oBvKM50n4IboBl_g7QYbcXxjpRxJERoJMlOvJWmrD2JYjZli8Q/exec", 
+  DEV_URL: "https://script.google.com/macros/s/AKfycbxnpvo68iaT0IZwBiuCvPOf_Cx8wqHx8t_SRUGlrU3N/dev", 
   // Masukkan URL /exec (Web App) untuk deployment publik
-  PROD_URL: "https://script.google.com/macros/s/AKfycbxnpvo68iaT0IZwBiuCvPOf_Cx8wqHx8t_SRUGlrU3N/dev",
+  PROD_URL: "https://script.google.com/macros/s/AKfycbyiOtJwKoIoC8Z7a9c_qVwv6_b5Yz4uTe3OzJEYe6K7ZMfxB7Zuy0PX2fZaqO9a_aiU_w/exec",
   // Logika pendeteksi: Apakah kita buka di localhost atau github.io?
   IS_LOCAL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 };
