@@ -29,49 +29,126 @@ window.smartFetch = async function(params) {
   });
 };
 
-// B. Mesin Navigasi Halaman
+/* 4.6.2 - Advanced Dashboard & Navigation Logic */
+
+// 1. Fungsi Logout dengan Pembersihan Sesi
+window.handleLogout = function() {
+  Swal.fire({
+    title: 'TERMINATE_SESSION?',
+    text: "Sesi akses akan ditutup secara permanen.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#000',
+    cancelButtonColor: '#27272a',
+    confirmButtonText: 'LOGOUT',
+    customClass: { popup: 'rounded-none' }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.reload(); // Paksa kembali ke Login
+    }
+  });
+};
+
+// 2. Fungsi Navigasi dengan Safeguard 404
 window.navigateTo = async function(pageId) {
   const container = document.getElementById('app-container');
+  const contentArea = document.getElementById('content-area');
+  
   try {
     const response = await fetch(`./pages/${pageId}.html`);
-    if (!response.ok) throw new Error("File not found");
-    const html = await response.text();
-    container.innerHTML = html;
     
-    // Aktifkan Script internal di dalam HTML yang dimuat
-    const scripts = container.querySelectorAll('script');
+    // Jika file tidak ditemukan (404)
+    if (!response.ok) {
+      if (contentArea) {
+        return render404(pageId);
+      } else {
+        throw new Error("CORE_FILE_MISSING");
+      }
+    }
+    
+    const html = await response.text();
+    
+    if (pageId === 'Login' || pageId === 'Dashboard_Layout') {
+      container.innerHTML = html;
+      if (pageId === 'Dashboard_Layout') setTimeout(window.initializeDashboard, 100);
+    } else {
+      contentArea.innerHTML = html;
+      document.getElementById('current-page-title').innerText = pageId.replace(/_/g, ' ');
+    }
+    
+    // Execute Scripts
+    const scripts = (contentArea || container).querySelectorAll('script');
     scripts.forEach(s => {
       const n = document.createElement('script');
       n.text = s.text;
       document.body.appendChild(n).parentNode.removeChild(n);
     });
 
-    // Jalankan inisialisasi khusus jika masuk ke Dashboard
-    if (pageId === 'Dashboard_Layout') setTimeout(window.initializeDashboard, 100);
   } catch (e) {
-    console.error("Nav Error:", e);
+    console.error("Critical Nav Error:", e);
     if (pageId !== 'Login') window.navigateTo('Login');
   }
 };
 
-// C. Logika Dashboard Shell
+// 3. Render Custom 404 (Sharp Executive Style)
+function render404(pageId) {
+  const contentArea = document.getElementById('content-area');
+  contentArea.innerHTML = `
+    <div class="flex flex-col items-center justify-center h-full border-2 border-dashed border-zinc-100 p-12">
+      <span class="text-[100px] font-black text-zinc-50 mb-4 select-none italic">404</span>
+      <h2 class="text-xs font-black uppercase tracking-[0.4em] text-zinc-950 mb-2">Module_Not_Found</h2>
+      <p class="text-[10px] font-mono text-zinc-400 uppercase mb-8">Path: pages/${pageId}.html</p>
+      <div class="h-[1px] w-12 bg-zinc-950 mb-8"></div>
+      <button onclick="window.location.reload()" class="px-8 py-3 bg-zinc-950 text-white text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all">
+        Return to Core
+      </button>
+    </div>
+  `;
+}
+
+// 4. Inisialisasi Sidebar Accordion
 window.initializeDashboard = function() {
   const user = window.userData;
-  if (!user.username) return window.navigateTo('Login');
+  const menuContainer = document.getElementById('exec-sidebar-nav');
+  if(!user || !menuContainer) return;
 
-  if(document.getElementById('user-name-display')) document.getElementById('user-name-display').innerText = user.nama;
-  if(document.getElementById('user-role-display')) document.getElementById('user-role-display').innerText = user.role;
+  document.getElementById('exec-name').innerText = user.nama;
+  document.getElementById('exec-role').innerText = user.role;
+  menuContainer.innerHTML = '';
 
-  // Render Sidebar Menu
-  const menuContainer = document.getElementById('sidebar-menu');
-  if (menuContainer && user.menus) {
-    menuContainer.innerHTML = user.menus.map(m => `
-      <button onclick="navigateTo('${m.pageId}')" class="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold rounded-lg hover:bg-zinc-900 hover:text-white transition-all group">
-        <div class="w-1.5 h-1.5 rounded-full bg-zinc-700 group-hover:bg-amber-500"></div>
-        <span class="uppercase tracking-widest">${m.name}</span>
+  // Logika Grouping berdasarkan Kolom Parent di Sheet
+  const groups = {};
+  user.menus.forEach(m => {
+    const p = m.parent || "CORE_ACCESS";
+    if (!groups[p]) groups[p] = [];
+    groups[p].push(m);
+  });
+
+  Object.keys(groups).forEach((gName, idx) => {
+    const gId = `group-${idx}`;
+    const section = document.createElement('div');
+    section.className = "border-b border-zinc-900";
+    
+    section.innerHTML = `
+      <button onclick="document.getElementById('${gId}').classList.toggle('hidden')" 
+        class="w-full px-8 py-4 flex items-center justify-between bg-zinc-900/10 hover:bg-zinc-900 transition-all group">
+        <span class="text-[9px] font-black text-zinc-600 uppercase tracking-[0.3em] group-hover:text-zinc-400">${gName}</span>
+        <svg class="w-3 h-3 text-zinc-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3"/></svg>
       </button>
-    `).join('');
-  }
+      <div id="${gId}" class="hidden bg-black/10">
+        ${groups[gName].map(m => `
+          <button onclick="navigateTo('${m.pageId}')" 
+            class="w-full flex items-center gap-4 px-10 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-white hover:bg-zinc-900 border-l-2 border-transparent hover:border-amber-500 transition-all">
+            <span class="text-xs">${m.icon || '○'}</span>
+            <span class="truncate">${m.name}</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    menuContainer.appendChild(section);
+  });
 };
 
 /* 1.1.3 - App Entry Point */
@@ -99,48 +176,4 @@ window.toggleGroup = function(groupId) {
   const icon = document.getElementById('icon-' + groupId);
   content.classList.toggle('hidden');
   if(icon) icon.classList.toggle('rotate-180');
-};
-
-window.initializeDashboard = function() {
-  const user = window.userData;
-  if (!user || !user.username) return window.navigateTo('Login');
-
-  document.getElementById('exec-name').innerText = user.nama;
-  document.getElementById('exec-role').innerText = user.role;
-
-  const menuContainer = document.getElementById('exec-sidebar-nav');
-  menuContainer.innerHTML = '';
-
-  // 1. Grouping Data (Sheet Column A)
-  const groups = {};
-  user.menus.forEach(m => {
-    const p = m.parent || "DEFAULT_ACCESS";
-    if (!groups[p]) groups[p] = [];
-    groups[p].push(m);
-  });
-
-  // 2. Render Accordion Structure
-  Object.keys(groups).forEach((gName, index) => {
-    const safeId = `grp-${index}`;
-    const section = document.createElement('div');
-    section.className = "border-b border-zinc-900/50";
-    
-    section.innerHTML = `
-      <button onclick="window.toggleGroup('${safeId}')" 
-        class="w-full px-6 py-4 flex items-center justify-between bg-zinc-900/20 hover:bg-zinc-900 transition-colors">
-        <span class="text-[9px] font-black text-zinc-500 uppercase tracking-[0.3em]">${gName}</span>
-        <svg id="icon-${safeId}" class="w-3 h-3 text-zinc-700 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3"></path></svg>
-      </button>
-      <div id="${safeId}" class="hidden flex flex-col bg-black/20">
-        ${groups[gName].map(m => `
-          <button onclick="navigateTo('${m.pageId}'); if(window.innerWidth < 768) toggleMobileSidebar();" 
-            class="w-full flex items-center gap-4 px-10 py-3.5 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-white border-l-2 border-transparent hover:border-amber-500 transition-all">
-            <span class="text-xs">${m.icon || '○'}</span>
-            <span class="truncate">${m.name}</span>
-          </button>
-        `).join('')}
-      </div>
-    `;
-    menuContainer.appendChild(section);
-  });
 };
