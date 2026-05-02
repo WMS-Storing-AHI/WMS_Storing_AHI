@@ -95,67 +95,100 @@ window.navigateTo = async function(pageId) {
 /* 3. SIDEBAR ACCORDION ENGINE (ANTI-DOUBLE) */
 window.initializeDashboard = function() {
   const user = window.userData;
-  if (!user || !user.username) return window.navigateTo('Login');
+  const menuContainer = document.getElementById('exec-sidebar-nav');
+  if(!user || !menuContainer) return;
 
-  document.getElementById('exec-name').innerText = user.nama;
-  document.getElementById('exec-role').innerText = user.role;
+  // 1. Update Profile Info
+  const nameEl = document.getElementById('exec-name');
+  const roleEl = document.getElementById('exec-role');
+  if (nameEl) nameEl.innerText = user.nama || "---";
+  if (roleEl) roleEl.innerText = user.role || "---";
+  
+  menuContainer.innerHTML = '';
 
-  const nav = document.getElementById('exec-sidebar-nav');
-  if (!nav) return;
-  nav.innerHTML = '';
-
-  // 1. Standarisasi Data (Hilangkan spasi berlebih di awal/akhir)
+  // 2. Bersihkan spasi kosong dari data Sheet
   const cleanMenus = user.menus.map(m => ({
-    ...m,
     parent: (m.parent || "").toString().trim(),
     name: (m.name || "").toString().trim(),
-    pageId: (m.pageId || "").toString().trim()
+    pageId: (m.pageId || "").toString().trim(),
+    icon: (m.icon || "").toString().trim()
   }));
 
-  // 2. Filter Menu Utama (Yang Parent-nya Kosong)
+  // 3. Filter Menu: Pisahkan Root (Parent Kosong)
   const rootMenus = cleanMenus.filter(m => m.parent === "");
 
-  rootMenus.forEach((root, idx) => {
-    // 3. Cari anak-anaknya (Yang kolom Parent-nya persis sama dengan Nama menu ini)
-    const children = cleanMenus.filter(m => m.parent === root.name);
-    
-    if (children.length > 0) {
-      // JIKA PUNYA ANAK -> BUAT FOLDER (ACCORDION)
-      const gId = 'folder-' + idx;
-      const folder = document.createElement('div');
-      folder.className = "border-b border-zinc-900";
-      folder.innerHTML = `
-        <button onclick="document.getElementById('${gId}').classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')" 
-          class="w-full px-8 py-4 flex items-center justify-between bg-zinc-900/30 hover:bg-zinc-900 transition-all text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
-          <div class="flex items-center gap-3"><span class="text-xs">${root.icon || '📁'}</span><span>${root.name}</span></div>
-          <svg class="w-3 h-3 transition-transform text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div id="${gId}" class="hidden flex-col bg-black/20">
-          ${children.map(child => `
-            <button onclick="window.navigateTo('${child.pageId}')" 
-              class="w-full flex items-center gap-4 px-12 py-3.5 text-[10px] font-bold text-zinc-500 hover:text-white hover:bg-zinc-900 border-l-2 border-transparent hover:border-amber-500 transition-all text-left uppercase tracking-widest">
-              <span class="text-xs grayscale opacity-50">${child.icon || '○'}</span><span class="truncate">${child.name}</span>
-            </button>
-          `).join('')}
-        </div>
-      `;
-      nav.appendChild(folder);
-    } else {
-      // JIKA TIDAK PUNYA ANAK -> BUAT TOMBOL BIASA
-      // Cegah pembuatan tombol kosong jika namanya kosong
-      if (root.name !== "") {
-        const btn = document.createElement('button');
-        btn.className = "w-full px-8 py-4 flex items-center gap-3 text-[10px] font-black text-zinc-400 hover:text-white hover:bg-zinc-900 border-b border-zinc-900 transition-all uppercase tracking-[0.2em] text-left";
-        btn.innerHTML = `<span>${root.icon || '■'}</span><span>${root.name}</span>`;
-        btn.onclick = () => window.navigateTo(root.pageId);
-        nav.appendChild(btn);
-      }
+  rootMenus.forEach((item, idx) => {
+    // Cari anak-anaknya (items yang kolom Parent-nya adalah nama item ini)
+    const children = cleanMenus.filter(m => m.parent === item.name);
+
+    if (item.pageId !== "") {
+      // KASUS A: Standalone Button (Jika ada Page ID)
+      menuContainer.appendChild(renderStandaloneButton(item));
+    } else if (children.length > 0) {
+      // KASUS B: Accordion Folder (Jika Page ID Kosong & Punya Anak)
+      const gId = `group-${idx}`;
+      menuContainer.appendChild(renderAccordionFolder(item, children, gId));
     }
   });
 
   // JALANKAN SISTEM ANTI-MULTI DEVICE
-  startDeviceGuardian();
+  if (typeof startDeviceGuardian === "function") startDeviceGuardian();
 };
+
+/* Komponen A: Tombol Tunggal (Sharp Style) */
+function renderStandaloneButton(item) {
+  const btn = document.createElement('button');
+  btn.className = "w-full flex items-center gap-4 px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] hover:bg-zinc-900 hover:text-white transition-all border-b border-zinc-900 text-left";
+  btn.innerHTML = `
+    <span class="text-xs grayscale group-hover:grayscale-0">${item.icon || '■'}</span>
+    <span class="truncate">${item.name}</span>
+  `;
+  btn.onclick = () => window.navigateTo(item.pageId);
+  return btn;
+}
+
+/* Komponen B: Folder Accordion (Sharp Style) */
+function renderAccordionFolder(parent, children, gId) {
+  const container = document.createElement('div');
+  container.className = "border-b border-zinc-900";
+  
+  // Header Accordion
+  container.innerHTML = `
+    <button onclick="document.getElementById('${gId}').classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')" 
+      class="w-full px-8 py-4 flex items-center justify-between bg-zinc-900/30 hover:bg-zinc-900 transition-all group">
+      <div class="flex items-center gap-4">
+        <span class="text-xs">${parent.icon || '📁'}</span>
+        <span class="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] group-hover:text-zinc-400">${parent.name}</span>
+      </div>
+      <svg class="w-3 h-3 text-zinc-800 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M19 9l-7 7-7-7" stroke-width="3"/>
+      </svg>
+    </button>
+    <div id="${gId}" class="hidden bg-black/20 flex-col">
+    </div>
+  `;
+
+  // Isi Anak-anaknya (Sub-menu)
+  const subContainer = container.querySelector(`#${gId}`);
+  children.forEach(m => {
+    const subBtn = document.createElement('button');
+    subBtn.className = "w-full flex items-center gap-4 px-12 py-3.5 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-white hover:bg-zinc-900 border-l-2 border-transparent hover:border-amber-500 transition-all text-left";
+    subBtn.innerHTML = `
+      <span class="text-xs grayscale opacity-60">${m.icon || '○'}</span>
+      <span class="truncate">${m.name}</span>
+    `;
+    subBtn.onclick = () => {
+      window.navigateTo(m.pageId);
+      // Jika di mobile, tutup sidebar setelah klik menu
+      if(window.innerWidth < 768 && typeof window.toggleMobileSidebar === "function") {
+        window.toggleMobileSidebar(true);
+      }
+    };
+    subContainer.appendChild(subBtn);
+  });
+
+  return container;
+}
 
 
 /* 4. AUTHENTICATION HANDLERS */
