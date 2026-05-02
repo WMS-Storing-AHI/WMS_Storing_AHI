@@ -94,9 +94,7 @@ window.navigateTo = async function(pageId) {
 
 /* 3. SIDEBAR ACCORDION ENGINE (ANTI-DOUBLE) */
 window.initializeDashboard = function() {
-  const user = window.userData;
-  const nav = document.getElementById('exec-sidebar-nav');
-   if (!window.userData || !window.userData.username) {
+  if (!window.userData || !window.userData.username) {
     const savedData = sessionStorage.getItem("userData");
     if (savedData) window.userData = JSON.parse(savedData);
   }
