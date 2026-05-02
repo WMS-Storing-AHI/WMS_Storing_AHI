@@ -39,6 +39,90 @@
         }
       }, 300); // Beri jeda 300ms agar engine JS siap
     };
+
+    /* =======================================
+   WMS PRO - FRONTEND LOGIC (script.js)
+======================================= */
+
+/* --- 1. ANTI MULTI-TAB (1 BROWSER = 1 TAB) --- */
+const tabChannel = new BroadcastChannel('wms_security_channel');
+const TAB_ID = Math.random().toString(36).substring(7);
+
+function enforceSingleTab() {
+  if (!window.BroadcastChannel) return;
+  const isVerified = sessionStorage.getItem('tab_verified');
+  
+  if (!isVerified) {
+    let tabConflict = false;
+    const radar = (e) => { if (e.data.type === 'ALREADY_ACTIVE') tabConflict = true; };
+    tabChannel.addEventListener('message', radar);
+    tabChannel.postMessage({ type: 'NEW_TAB_OPENED', id: TAB_ID });
+
+    setTimeout(() => {
+      tabChannel.removeEventListener('message', radar);
+      if (tabConflict) {
+        document.body.innerHTML = `
+          <div class="h-screen flex flex-col items-center justify-center bg-zinc-950 text-white p-6 text-center">
+            <h1 class="text-3xl font-black text-red-500 mb-2">SECURITY ALERT</h1>
+            <p class="text-xs uppercase tracking-widest text-zinc-400">Aplikasi sudah terbuka di tab lain.</p>
+          </div>`;
+        throw new Error("MULTI_TAB_BLOCKED");
+      } else {
+        sessionStorage.setItem('tab_verified', 'true');
+      }
+    }, 500);
+  }
+}
+tabChannel.onmessage = (e) => { 
+  if (e.data.type === 'NEW_TAB_OPENED' && e.data.id !== TAB_ID) tabChannel.postMessage({ type: 'ALREADY_ACTIVE', id: TAB_ID }); 
+};
+enforceSingleTab();
+
+// MASUKKAN URL APPS SCRIPT ANDA DI SINI
+const API_URL = "https://script.google.com/macros/s/AKfycbw3Hp322Bn7SYCONY0gx8_W0jidssLUUOD5thdBlUPYGLBi1T6hwK9zzH7jmS_aYBwDJQ/exec";
+
+// Fungsi untuk mengambil data user dari memori mana pun
+const getSessionUser = () => {
+    const saved = localStorage.getItem("userData");
+    return saved ? JSON.parse(saved) : null;
+};
+
+/* =========================================================
+   2. ENGINE NAVIGASI (PENGAMAN HALAMAN)
+========================================================= */
+window.navigateTo = async function(pageId) {
+  const container = document.getElementById('app-container');
+  
+  // Jika mencoba masuk Dashboard tapi data user tidak ada di memori, PAKSA ke Login
+  if (pageId === 'Dashboard_Layout') {
+    const user = getSessionUser();
+    if (!user) pageId = 'Login';
+  }
+
+  try {
+    const res = await fetch(`./pages/${pageId}.html?v=${Date.now()}`);
+    if(!res.ok) throw new Error("404");
+    const html = await res.text();
+
+    container.innerHTML = html;
+    
+    // Jalankan script yang ada di dalam file HTML
+    container.querySelectorAll('script').forEach(s => {
+      const n = document.createElement('script');
+      n.text = `{ ${s.text} }`; // Scoped block untuk hindari error redeclare
+      document.body.appendChild(n);
+    });
+
+    // Inisialisasi Dashboard jika layoutnya sudah muncul
+    if (pageId === 'Dashboard_Layout') {
+        setTimeout(window.initializeDashboard, 150);
+    }
+  } catch (e) {
+    console.error("Nav Error:", e);
+    if (pageId !== 'Login') window.navigateTo('Login');
+  }
+};
+    
   </script>
 
 </body>
