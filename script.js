@@ -104,15 +104,23 @@ window.initializeDashboard = function() {
   if (!nav) return;
   nav.innerHTML = '';
 
-  // Filter Menu Utama (Parent Kosong)
-  const rootMenus = user.menus.filter(m => m.parent === "");
+  // 1. Standarisasi Data (Hilangkan spasi berlebih di awal/akhir)
+  const cleanMenus = user.menus.map(m => ({
+    ...m,
+    parent: (m.parent || "").toString().trim(),
+    name: (m.name || "").toString().trim(),
+    pageId: (m.pageId || "").toString().trim()
+  }));
+
+  // 2. Filter Menu Utama (Yang Parent-nya Kosong)
+  const rootMenus = cleanMenus.filter(m => m.parent === "");
 
   rootMenus.forEach((root, idx) => {
-    // Cari anak-anaknya
-    const children = user.menus.filter(m => m.parent === root.name);
+    // 3. Cari anak-anaknya (Yang kolom Parent-nya persis sama dengan Nama menu ini)
+    const children = cleanMenus.filter(m => m.parent === root.name);
     
     if (children.length > 0) {
-      // JIKA PUNYA ANAK -> BUAT FOLDER BISA DI-KLIK (ACCORDION)
+      // JIKA PUNYA ANAK -> BUAT FOLDER (ACCORDION)
       const gId = 'folder-' + idx;
       const folder = document.createElement('div');
       folder.className = "border-b border-zinc-900";
@@ -126,21 +134,28 @@ window.initializeDashboard = function() {
           ${children.map(child => `
             <button onclick="window.navigateTo('${child.pageId}')" 
               class="w-full flex items-center gap-4 px-12 py-3.5 text-[10px] font-bold text-zinc-500 hover:text-white hover:bg-zinc-900 border-l-2 border-transparent hover:border-amber-500 transition-all text-left uppercase tracking-widest">
-              <span class="text-xs grayscale">${child.icon || '○'}</span><span class="truncate">${child.name}</span>
+              <span class="text-xs grayscale opacity-50">${child.icon || '○'}</span><span class="truncate">${child.name}</span>
             </button>
           `).join('')}
         </div>
       `;
       nav.appendChild(folder);
     } else {
-      // JIKA TIDAK PUNYA ANAK -> BUAT TOMBOL STANDAR
-      const btn = document.createElement('button');
-      btn.className = "w-full px-8 py-4 flex items-center gap-3 text-[10px] font-black text-zinc-400 hover:text-white hover:bg-zinc-900 border-b border-zinc-900 transition-all uppercase tracking-[0.2em] text-left";
-      btn.innerHTML = `<span>${root.icon || '■'}</span><span>${root.name}</span>`;
-      btn.onclick = () => window.navigateTo(root.pageId);
-      nav.appendChild(btn);
+      // JIKA TIDAK PUNYA ANAK -> BUAT TOMBOL BIASA
+      // Cegah pembuatan tombol kosong jika namanya kosong
+      if (root.name !== "") {
+        const btn = document.createElement('button');
+        btn.className = "w-full px-8 py-4 flex items-center gap-3 text-[10px] font-black text-zinc-400 hover:text-white hover:bg-zinc-900 border-b border-zinc-900 transition-all uppercase tracking-[0.2em] text-left";
+        btn.innerHTML = `<span>${root.icon || '■'}</span><span>${root.name}</span>`;
+        btn.onclick = () => window.navigateTo(root.pageId);
+        nav.appendChild(btn);
+      }
     }
   });
+
+  // JALANKAN SISTEM ANTI-MULTI DEVICE
+  startDeviceGuardian();
+};
 
   // JALANKAN SISTEM ANTI-MULTI DEVICE
   startDeviceGuardian();
