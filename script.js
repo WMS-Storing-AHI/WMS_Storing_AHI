@@ -157,9 +157,6 @@ window.initializeDashboard = function() {
   startDeviceGuardian();
 };
 
-  // JALANKAN SISTEM ANTI-MULTI DEVICE
-  startDeviceGuardian();
-};
 
 /* 4. AUTHENTICATION HANDLERS */
 window.handleLogin = async function(e) {
