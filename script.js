@@ -93,102 +93,91 @@ window.navigateTo = async function(pageId) {
 };
 
 /* 3. SIDEBAR ACCORDION ENGINE (ANTI-DOUBLE) */
+/* --- 3. SIDEBAR ACCORDION ENGINE (BRUTAL GROUPING) --- */
 window.initializeDashboard = function() {
   const user = window.userData;
-  const menuContainer = document.getElementById('exec-sidebar-nav');
-  if(!user || !menuContainer) return;
+  const nav = document.getElementById('exec-sidebar-nav');
+  if (!nav || !user || !user.menus) return;
 
-  // 1. Update Profile Info
-  const nameEl = document.getElementById('exec-name');
-  const roleEl = document.getElementById('exec-role');
-  if (nameEl) nameEl.innerText = user.nama || "---";
-  if (roleEl) roleEl.innerText = user.role || "---";
+  // Info Profil
+  if (document.getElementById('exec-name')) document.getElementById('exec-name').innerText = user.nama || "GUEST";
+  if (document.getElementById('exec-role')) document.getElementById('exec-role').innerText = user.role || "UNKNOWN";
   
-  menuContainer.innerHTML = '';
+  nav.innerHTML = '';
 
-  // 2. Bersihkan spasi kosong dari data Sheet
-  const cleanMenus = user.menus.map(m => ({
-    parent: (m.parent || "").toString().trim(),
-    name: (m.name || "").toString().trim(),
-    pageId: (m.pageId || "").toString().trim(),
-    icon: (m.icon || "").toString().trim()
-  }));
+  // WADAH PENYIMPANAN SEMENTARA
+  const standaloneButtons = [];
+  const folders = {};
 
-  // 3. Filter Menu: Pisahkan Root (Parent Kosong)
-  const rootMenus = cleanMenus.filter(m => m.parent === "");
+  // 1. PROSES PEMILAHAN DATA (Sangat Ketat)
+  user.menus.forEach(m => {
+    // Bersihkan spasi dan jadikan huruf besar semua untuk dicocokkan
+    const parentName = (m.parent || "").toString().trim();
+    const pageId = (m.pageId || "").toString().trim();
+    const menuName = (m.name || "").toString().trim();
 
-  rootMenus.forEach((item, idx) => {
-    // Cari anak-anaknya (items yang kolom Parent-nya adalah nama item ini)
-    const children = cleanMenus.filter(m => m.parent === item.name);
-
-    if (item.pageId !== "") {
-      // KASUS A: Standalone Button (Jika ada Page ID)
-      menuContainer.appendChild(renderStandaloneButton(item));
-    } else if (children.length > 0) {
-      // KASUS B: Accordion Folder (Jika Page ID Kosong & Punya Anak)
-      const gId = `group-${idx}`;
-      menuContainer.appendChild(renderAccordionFolder(item, children, gId));
+    if (parentName === "") {
+      if (pageId !== "") {
+        // JIKA: Parent kosong & Page ID ADA = TOMBOL BERANDA / PERSONAL
+        standaloneButtons.push(m);
+      } else {
+        // JIKA: Parent kosong & Page ID KOSONG = KEPALA FOLDER (Form Kerja, Report)
+        // Kita buatkan rumah foldernya
+        const folderKey = menuName.toUpperCase();
+        if (!folders[folderKey]) folders[folderKey] = { title: menuName, icon: m.icon, children: [] };
+      }
+    } else {
+      // JIKA: Parent ADA isinya = ANAK BUAH (CC Transaksi, Penurunan)
+      const folderKey = parentName.toUpperCase();
+      // Pastikan rumah foldernya ada, kalau belum ada, buatkan darurat
+      if (!folders[folderKey]) folders[folderKey] = { title: parentName, icon: '📁', children: [] };
+      
+      folders[folderKey].children.push(m);
     }
   });
 
-  // JALANKAN SISTEM ANTI-MULTI DEVICE
-  if (typeof startDeviceGuardian === "function") startDeviceGuardian();
-};
-
-/* Komponen A: Tombol Tunggal (Sharp Style) */
-function renderStandaloneButton(item) {
-  const btn = document.createElement('button');
-  btn.className = "w-full flex items-center gap-4 px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] hover:bg-zinc-900 hover:text-white transition-all border-b border-zinc-900 text-left";
-  btn.innerHTML = `
-    <span class="text-xs grayscale group-hover:grayscale-0">${item.icon || '■'}</span>
-    <span class="truncate">${item.name}</span>
-  `;
-  btn.onclick = () => window.navigateTo(item.pageId);
-  return btn;
-}
-
-/* Komponen B: Folder Accordion (Sharp Style) */
-function renderAccordionFolder(parent, children, gId) {
-  const container = document.createElement('div');
-  container.className = "border-b border-zinc-900";
-  
-  // Header Accordion
-  container.innerHTML = `
-    <button onclick="document.getElementById('${gId}').classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')" 
-      class="w-full px-8 py-4 flex items-center justify-between bg-zinc-900/30 hover:bg-zinc-900 transition-all group">
-      <div class="flex items-center gap-4">
-        <span class="text-xs">${parent.icon || '📁'}</span>
-        <span class="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] group-hover:text-zinc-400">${parent.name}</span>
-      </div>
-      <svg class="w-3 h-3 text-zinc-800 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M19 9l-7 7-7-7" stroke-width="3"/>
-      </svg>
-    </button>
-    <div id="${gId}" class="hidden bg-black/20 flex-col">
-    </div>
-  `;
-
-  // Isi Anak-anaknya (Sub-menu)
-  const subContainer = container.querySelector(`#${gId}`);
-  children.forEach(m => {
-    const subBtn = document.createElement('button');
-    subBtn.className = "w-full flex items-center gap-4 px-12 py-3.5 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-white hover:bg-zinc-900 border-l-2 border-transparent hover:border-amber-500 transition-all text-left";
-    subBtn.innerHTML = `
-      <span class="text-xs grayscale opacity-60">${m.icon || '○'}</span>
-      <span class="truncate">${m.name}</span>
-    `;
-    subBtn.onclick = () => {
-      window.navigateTo(m.pageId);
-      // Jika di mobile, tutup sidebar setelah klik menu
-      if(window.innerWidth < 768 && typeof window.toggleMobileSidebar === "function") {
-        window.toggleMobileSidebar(true);
-      }
-    };
-    subContainer.appendChild(subBtn);
+  // 2. RENDER TOMBOL BERANDA / PERSONAL (Di atas folder)
+  standaloneButtons.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = "w-full flex items-center gap-4 px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] hover:bg-zinc-900 hover:text-white transition-all border-b border-zinc-900 text-left group";
+    btn.innerHTML = `<span class="text-xs grayscale group-hover:grayscale-0">${m.icon || '■'}</span><span class="truncate">${m.name}</span>`;
+    btn.onclick = () => window.navigateTo(m.pageId);
+    nav.appendChild(btn);
   });
 
-  return container;
-}
+  // 3. RENDER FOLDER ACCORDION (Form Kerja, Report, dll)
+  let fIndex = 0;
+  Object.keys(folders).forEach(key => {
+    const folderData = folders[key];
+    if (folderData.children.length === 0) return; // Abaikan folder jika tidak ada isinya
+
+    const gId = 'folder-' + fIndex++;
+    const div = document.createElement('div');
+    div.className = "border-b border-zinc-900";
+    
+    // HTML Untuk Folder (Bisa diklik Buka Tutup)
+    div.innerHTML = `
+      <button onclick="document.getElementById('${gId}').classList.toggle('hidden'); this.querySelector('.arrow-icon').classList.toggle('rotate-180')" 
+        class="w-full px-8 py-4 flex items-center justify-between bg-zinc-900/30 hover:bg-zinc-900 transition-all group outline-none">
+        <div class="flex items-center gap-4">
+          <span class="text-xs grayscale">${folderData.icon || '📁'}</span>
+          <span class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] group-hover:text-zinc-300">${folderData.title}</span>
+        </div>
+        <svg class="arrow-icon w-3 h-3 text-zinc-600 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3"/></svg>
+      </button>
+      <div id="${gId}" class="hidden flex-col bg-black/40 shadow-inner">
+        ${folderData.children.map(child => `
+          <button onclick="window.navigateTo('${child.pageId}'); if(window.innerWidth < 768) window.toggleMobileSidebar(true);" 
+            class="w-full flex items-center gap-4 px-12 py-3.5 text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-white hover:bg-zinc-900 border-l-2 border-transparent hover:border-amber-500 transition-all text-left group">
+            <span class="text-xs grayscale opacity-40 group-hover:opacity-100 group-hover:grayscale-0 transition-all">${child.icon || '○'}</span>
+            <span class="truncate">${child.name}</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    nav.appendChild(div);
+  });
+};
 
 
 /* 4. AUTHENTICATION HANDLERS */
