@@ -7,6 +7,51 @@ const UI_THEME = {
   focusRing: "focus:ring-0 focus:border-zinc-950",
   buttonStyle: "bg-zinc-950 hover:bg-zinc-800 text-white"
 };
+
+  /* =========================================================
+   4. AUTH & SECURITY (ANTI-DEVICE)
+========================================================= */
+window.handleLogin = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const data = { username: e.target.username.value, password: e.target.password.value };
+  
+  if(btn) { btn.disabled = true; btn.innerText = "AUTHENTICATING..."; }
+
+  try {
+    const res = await window.smartFetch({ action: "checkLogin", ...data });
+    if (res.status === "success") {
+      // SIMPAN PERMANEN KE LOCALSTORAGE
+      localStorage.setItem("userData", JSON.stringify(res));
+      window.navigateTo('Dashboard_Layout');
+    } else {
+      Swal.fire('Gagal', res.message, 'error');
+      if(btn) { btn.disabled = false; btn.innerText = "AUTHORIZE ACCESS"; }
+    }
+  } catch(e) { 
+    Swal.fire('Error', 'Server Connection Failed', 'error'); 
+    if(btn) { btn.disabled = false; btn.innerText = "AUTHORIZE ACCESS"; }
+  }
+};
+
+window.smartFetch = function(params) {
+  let url = API_URL + "?";
+  for (let key in params) { url += key + "=" + encodeURIComponent(params[key]) + "&"; }
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url);
+    xhr.onload = () => resolve(JSON.parse(xhr.responseText));
+    xhr.onerror = () => reject("Network Error");
+    xhr.send();
+  });
+};
+
+window.handleLogout = () => {
+  const user = getSessionUser();
+  if (user) fetch(`${API_URL}?action=logoutUser&username=${user.username}`);
+  localStorage.clear();
+  window.location.reload();
+};
   
 </script>
 
