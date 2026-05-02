@@ -2,27 +2,44 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>WMS PRO | Industrial Node</title>
-  <!-- Tailwind & Fonts -->
+  
+  <!-- Tailwind & SweetAlert -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- CSS Utama -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="antialiased bg-[#fafafa]">
-  <!-- Wadah Utama Navigasi Modern -->
-  <div id="app-container">
+  
+  <!-- WADAH UTAMA -->
+  <div id="app-container" class="min-h-screen">
     <div class="h-screen flex items-center justify-center">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
     </div>
   </div>
 
-    <script>
-    // AUTO CACHE-BUSTER: Memaksa HP selalu mengambil script.js versi terbaru
-    const script = document.createElement('script');
-    script.src = 'script.js?v=' + new Date().getTime(); 
-    document.body.appendChild(script);
+  <!-- LOAD JAVASCRIPT & LANGSUNG EKSEKUSI -->
+  <script src="script.js"></script>
+  <script>
+    // Pastikan DOM benar-benar siap
+    window.onload = () => {
+      setTimeout(() => {
+        if (typeof window.navigateTo === 'function') {
+          // Bersihkan sisa sesi lama agar aman
+          localStorage.removeItem('activeUser');
+          // Paksa buka halaman Login
+          window.navigateTo('Login');
+        } else {
+          // Jika script.js gagal diload
+          document.getElementById('app-container').innerHTML = 
+            "<h1 class='text-center p-10 font-bold text-red-500'>Error: script.js gagal dimuat. Cek Console (F12).</h1>";
+        }
+      }, 300); // Beri jeda 300ms agar engine JS siap
+    };
   </script>
-  
+
 </body>
 </html>
